@@ -6,7 +6,7 @@ public abstract class Actor {
     private double x;
     private double y;
 
-    public Actor(int x, int y) {
+    public Actor(double x, double y) {
         if(x < 0 || y < 0 && x > SiriusGUI.WIDTH || y > SiriusGUI.HEIGHT) {
             throw new ArithmeticException();
         }
