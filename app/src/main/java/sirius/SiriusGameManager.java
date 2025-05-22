@@ -1,11 +1,11 @@
 package sirius;
 
 import java.util.Random;
-import java.util.random.RandomGenerator;
 
 public class SiriusGameManager {
   private Player player;
   private SiriusGUI siriusGUI;
+  private int killCount = 0;
 
   public SiriusGameManager(){
     // DONT'T CHANGE
@@ -38,14 +38,24 @@ public class SiriusGameManager {
     if(spawnOpponent()){
       int chance = new Random().nextInt(3);
       double placeToBe = new Random().nextDouble(SiriusGUI.WIDTH);
-      OpponentSimple goblin = new OpponentSimple(placeToBe);
-      OpponentChaser moblin = new OpponentChaser(player,placeToBe);
-      OpponentLurker lizalfos = new OpponentLurker(placeToBe);
+      Actor goblin = new OpponentSimple(placeToBe);
+      Actor moblin = new OpponentChaser(player,placeToBe);
+      Actor lizalfos = new OpponentLurker(placeToBe);
       switch (chance){
         case 0 -> addActor(goblin);
         case 1 -> addActor(moblin);
         case 2 -> addActor(lizalfos);
       }
+    }
+    if(killCount >= 3){
+      int chancePwUp = new Random().nextInt(2);
+      Actor SpeedUp = new SpeedUp(250, 0);
+      Actor WeaponUp = new WeaponUp(250, 0);
+      switch (chancePwUp){
+        case 0 -> addActor(SpeedUp);
+        case 1 -> addActor(WeaponUp);
+      }
+      killCount = 0;
     }
     for(int i = 0; i < actors.length; i ++) {
       if (actors[i] != null) {
@@ -59,8 +69,56 @@ public class SiriusGameManager {
         if (actors[i] != null && actors[j] != null) {
           if (actors[i] != actors[j]) {
             if(Math.pow(actors[i].getX()-actors[j].getX(),2)+Math.pow(actors[i].getY()-actors[j].getY(),2)<=64){
-              actors[i] = null;
-              actors[j] = null;
+
+              if((actors[i] instanceof PowerUp) && (actors[j] instanceof Player)){
+                ((Upgradable) actors[i]).upgrade((Player) actors[0]);
+                actors[i] =null;
+              }
+
+              if((actors[j] instanceof PowerUp) && (actors[i] instanceof Player)){
+                ((Upgradable) actors[j]).upgrade((Player) actors[0]);
+                actors[j] =null;
+              }
+
+              if(actors[i] instanceof Projectile){
+                actors[i] = null;
+                if(actors[j] instanceof Player){
+                  actors[j] =null;
+                }
+              }
+
+              if(actors[j] instanceof Projectile){
+                actors[j] = null;
+                if(actors[i] instanceof Player){
+                  actors[i] =null;
+                }
+              }
+
+            //  if(actors[i] instanceof PowerUp && actors[j] instanceof Projectile){}
+              if(actors[i] instanceof Opponent) {
+                {
+                  killCount += 1;
+                  actors[i] = null;
+                  if( actors[j] instanceof Player){
+                    actors[j] = null;
+                  }
+                  System.out.println(killCount);
+                }
+              }
+
+              if(actors[j] instanceof Opponent) {
+                {
+                  killCount += 1;
+                  actors[j] = null;
+                  if( actors[i] instanceof Player){
+                    actors[i] = null;
+                  }
+                  System.out.println(killCount);
+                }
+              }
+
+        //      actors[i] = null;
+          //    actors[j] = null;
               if (actors[0] == null) {
                 siriusGUI.gameOver();
               }
